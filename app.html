@@ -2,119 +2,125 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>V10 Blue Dragon Overlay - @katilbebek</title>
-    <script src="/socket.io/socket.io.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
+    <title>V10 Blue Dragon Panel - @katilbebek</title>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        /* EKRAN AYARLARI */
-        body { margin: 0; overflow: hidden; background: transparent; font-family: 'Oswald', sans-serif; }
-        #overlay-container { position: relative; width: 100vw; height: 100vh; pointer-events: none; }
+        body { background: #00050a; color: white; font-family: 'Oswald', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { display: flex; gap: 30px; }
+        
+        /* SOL PANEL: LİNK OLUŞTURMA */
+        .left-panel { background: rgba(0, 212, 255, 0.05); border: 2px solid #00d4ff; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 0 50px rgba(0, 212, 255, 0.2); width: 450px; }
+        h1 { color: #00d4ff; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px; }
+        .sub-text { color: #aaa; margin-bottom: 25px; font-size: 14px; }
+        input { width: 100%; padding: 15px; margin: 10px 0; border-radius: 10px; border: 1px solid #00d4ff; background: #001a33; color: white; font-size: 18px; box-sizing: border-box; outline: none; }
+        button { background: #00d4ff; color: #000; border: none; padding: 15px; font-weight: bold; border-radius: 10px; cursor: pointer; font-size: 18px; width: 100%; transition: 0.3s; margin-top: 10px; }
+        button:hover { background: #fff; transform: scale(1.02); }
+        .result-box { margin-top: 25px; display: none; background: #001a33; padding: 15px; border-radius: 10px; border: 1px dashed #00d4ff; text-align: left; }
+        code { color: #fff; font-size: 13px; word-break: break-all; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #111; }
+        .price-tag { color: #ff0055; font-size: 18px; font-weight: bold; display: block; margin-bottom: 5px; }
+        .tg-link { color: #00d4ff; text-decoration: none; font-size: 20px; }
 
-        /* TEST PANELİ (SAĞ TARAF) */
-        #test-panel { 
-            position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
-            background: rgba(0, 10, 20, 0.9); border: 2px solid #00d4ff;
-            padding: 20px; border-radius: 15px; pointer-events: auto; z-index: 9999;
-            width: 200px; text-align: center; box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
-        }
-        #test-panel h3 { color: #00d4ff; margin-top: 0; font-size: 16px; text-transform: uppercase; }
-        .test-btn { 
-            width: 100%; padding: 10px; margin: 5px 0; border: none; border-radius: 5px;
-            cursor: pointer; font-weight: bold; font-family: 'Oswald'; transition: 0.3s;
-        }
+        /* SAĞ PANEL: TEST BUTONLARI */
+        .right-panel { background: rgba(0, 10, 20, 0.9); border: 2px solid #ff0055; padding: 20px; border-radius: 15px; width: 220px; text-align: center; box-shadow: 0 0 20px rgba(255, 0, 85, 0.5); }
+        h3 { color: #ff0055; margin-top: 0; font-size: 18px; text-transform: uppercase; }
+        .test-btn { width: 100%; padding: 10px; margin: 5px 0; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; font-family: 'Oswald'; transition: 0.3s; }
         .btn-follow { background: #1da1f2; color: white; }
         .btn-like { background: #ff0055; color: white; }
         .btn-gift { background: #ffaa00; color: black; }
         .test-btn:hover { transform: scale(1.05); filter: brightness(1.2); }
-
-        /* REKLAM ALANI */
-        #ads { color: #555; font-size: 12px; margin-top: 15px; }
-        #ads a { color: #00d4ff; text-decoration: none; }
-
-        /* EJDERHA VE TEXT ANİMASYONLARI (Senin v10 Efektlerin) */
-        .event-node { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; }
-        .dragon-gif { width: 500px; }
-        .event-text { color: white; font-size: 50px; text-shadow: 0 0 20px #00d4ff, 0 0 40px #00d4ff; display: block; }
-        .combo-text { color: #ff0055; font-size: 70px; font-style: italic; }
     </style>
 </head>
 <body>
 
-    <div id="overlay-container"></div>
-
-    <div id="test-panel" id="panel-hide">
-        <h3>V10 TEST MENÜSÜ</h3>
-        <button class="test-btn btn-follow" onclick="simulate('follow')">TAKİP TEST</button>
-        <button class="test-btn btn-like" onclick="simulate('like')">100 PENÇE TEST</button>
-        <button class="test-btn btn-gift" onclick="simulate('gift', 'Tea')">TEA (ÇAY) TEST</button>
-        <button class="test-btn btn-gift" onclick="simulate('gift', 'Rose')">ROSE (GÜL) TEST</button>
+<div class="container">
+    <div class="left-panel">
+        <h1>V10 DRAGON PANEL</h1>
+        <div class="sub-text">TikTok Live Overlay Link Oluşturucu</div>
         
-        <div id="ads">
-            SATIN AL: <br>
-            <a href="https://t.me/katilbebek" target="_blank">@katilbebek Telegram</a>
+        <input type="text" id="username" placeholder="@TikTokKullaniciAdi">
+        <button onclick="generateLink()">LİNKİ OLUŞTUR</button>
+
+        <div id="result" class="result-box">
+            <p style="font-size: 12px; color: #00d4ff; margin: 0 0 10px 0;">OBS TARAYICI KAYNAĞINA YAPIŞTIRIN:</p>
+            <code id="generatedUrl"></code>
+            <button onclick="copyUrl()" style="padding: 5px; font-size: 12px; margin-top: 10px; background: #555; color: white;">KOPYALA</button>
         </div>
-        <p style="font-size: 10px; color: #333;">OBS'de bu panel görünmez.</p>
+
+        <div class="footer">
+            <span class="price-tag">ŞUANLIK ÜCRETSİZDİR</span>
+            <div style="font-size: 14px; color: #777;">Özel sürüm ve Full destek için:</div>
+            <a href="https://t.me/katilbebek" class="tg-link">Telegram: @katilbebek</a>
+        </div>
     </div>
 
+    <div class="right-panel">
+        <h3>TEST PANELİ</h3>
+        <p style="font-size:12px; color:#aaa; margin-bottom:15px;">Overlay'i test etmek için kullanın.</p>
+        <button class="test-btn btn-follow" onclick="simulateEvent('follow')">TAKİP TEST</button>
+        <button class="test-btn btn-like" onclick="simulateEvent('like')">100 PENÇE TEST</button>
+        <button class="test-btn btn-gift" onclick="simulateEvent('gift', 'Tea')">TEA GÖNDER</button>
+        <button class="test-btn btn-gift" onclick="simulateEvent('gift', 'Rose')">ROSE GÖNDER</button>
+    </div>
+</div>
+
 <script>
-    const socket = io();
-    const container = document.getElementById('overlay-container');
-    
-    // URL'den kullanıcı adını al
-    const urlParams = new URLSearchParams(window.location.search);
-    const username = urlParams.get('k');
-    if (username) {
-        socket.emit('set-user', username);
+    // Kullanıcının oluşturduğu linki takip etmek için global bir değişken
+    let currentOverlayLink = '';
+
+    function generateLink() {
+        let user = document.getElementById('username').value.trim();
+        if(!user) return alert("Kullanıcı adı giriniz!");
+        if(!user.startsWith('@')) user = '@' + user;
+        
+        currentOverlayLink = window.location.origin + "/?k=" + encodeURIComponent(user); // index.html'e yönlendiriyoruz
+        document.getElementById('generatedUrl').innerText = currentOverlayLink;
+        document.getElementById('result').style.display = 'block';
     }
 
-    // TEST FONKSİYONU
-    let comboCount = 0;
-    function simulate(type, giftName = '') {
-        let mockData = {
-            uniqueId: 'TestUser',
-            type: type,
-            text: type === 'follow' ? 'TAKİP ETTİ!' : (type === 'like' ? '100 PENÇE ATTI!' : giftName.toUpperCase() + ' GÖNDERDİ!'),
-            giftName: giftName
-        };
-
-        if (type === 'gift') {
-            comboCount++;
-            mockData.combo = comboCount;
-            // Gül ise kombo yap, Çay ise direkt göster gibi mantık kurabilirsin
+    function copyUrl() {
+        if(currentOverlayLink) {
+            navigator.clipboard.writeText(currentOverlayLink);
+            alert("Link kopyalandı!");
         } else {
-            comboCount = 0;
+            alert("Önce bir link oluşturun!");
         }
-        
-        showEvent(mockData);
     }
 
-    // EVENT GÖSTERİMİ
-    socket.on('event', (data) => {
-        showEvent(data);
-    });
+    // TEST BUTONLARI İÇİN FONKSİYON
+    function simulateEvent(type, giftName = '') {
+        if (!currentOverlayLink) {
+            alert("Önce bir overlay linki oluşturmalısınız!");
+            return;
+        }
 
-    function showEvent(data) {
-        const div = document.createElement('div');
-        div.className = 'event-node';
-        
-        // Kombo varsa metni güncelle
-        let comboHtml = data.combo ? `<div class="combo-text">KOMBO x${data.combo}</div>` : '';
+        const testUser = '@TestUser';
+        const testPFP = 'https://p16-sign-va.tiktokcdn.com/tos-maliva-avt-0068/7342676759837900805~c5_100x100.jpeg'; // Rastgele bir PFP
+        let testText = '';
+        let repeatCount = 1;
 
-        div.innerHTML = `
-            <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueGZ3bmZ3bmZ3bmZ3bmZ3bmZ3bmZ3bmZ3bmZ3bmZ3bmZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKMGpxx6xY2H5T2/giphy.gif" class="dragon-gif">
-            <div class="event-text">@${data.uniqueId}</div>
-            <div class="event-text">${data.text}</div>
-            ${comboHtml}
-        `;
+        if (type === 'follow') testText = 'TAKİP ETTİ!';
+        else if (type === 'like') testText = '100 PENÇE ATTI!';
+        else if (type === 'gift') {
+            testText = `${giftName.toUpperCase()} GÖNDERDİ!`;
+            repeatCount = Math.floor(Math.random() * 5) + 1; // 1-5 arası rastgele kombo
+        }
 
-        container.appendChild(div);
-        setTimeout(() => div.remove(), 4000);
-    }
+        // Overlay linkini açıp test verisi gönder
+        const finalTestLink = `${currentOverlayLink}&testData=${encodeURIComponent(JSON.stringify({
+            uniqueId: testUser,
+            profilePictureUrl: testPFP,
+            text: testText,
+            repeatCount: repeatCount,
+            type: type,
+            giftName: giftName
+        }))}`;
 
-    // OBS'de sağ paneli gizleme (Opsiyonel: Kullanıcı isterse kapatır)
-    if(window.location.search.includes('hide=true')) {
-        document.getElementById('test-panel').style.display = 'none';
+        // Yeni bir pencerede aç veya mevcut pencereyi güncelle
+        window.open(finalTestLink, '_blank');
+        alert("Overlay açılıyor. Testi görmek için çıkan pencereye bakın.");
     }
 </script>
+
 </body>
 </html>
