@@ -2,52 +2,119 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>KatilBebek TikTok Overlay Panel</title>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <title>V10 Blue Dragon Overlay - @katilbebek</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { background: #00050a; color: white; font-family: 'Oswald', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .panel { background: rgba(0, 212, 255, 0.05); border: 2px solid #00d4ff; padding: 40px; border-radius: 20px; text-align: center; box-shadow: 0 0 50px rgba(0, 212, 255, 0.2); width: 400px; }
-        h1 { color: #00d4ff; text-transform: uppercase; letter-spacing: 2px; }
-        input { width: 100%; padding: 15px; margin: 20px 0; border-radius: 10px; border: none; background: #001a33; color: white; font-size: 18px; box-sizing: border-box; border: 1px solid #00d4ff; }
-        button { background: #00d4ff; color: #000; border: none; padding: 15px 30px; font-weight: bold; border-radius: 10px; cursor: pointer; font-size: 18px; width: 100%; transition: 0.3s; }
-        button:hover { background: #fff; transform: scale(1.05); }
-        .result { margin-top: 25px; display: none; background: #001a33; padding: 15px; border-radius: 10px; word-break: break-all; border: 1px dashed #00d4ff; }
-        .footer { margin-top: 30px; font-size: 14px; color: #777; }
-        .buy-now { color: #ff0055; text-decoration: none; font-weight: bold; display: block; margin-top: 10px; font-size: 18px; }
+        /* EKRAN AYARLARI */
+        body { margin: 0; overflow: hidden; background: transparent; font-family: 'Oswald', sans-serif; }
+        #overlay-container { position: relative; width: 100vw; height: 100vh; pointer-events: none; }
+
+        /* TEST PANELİ (SAĞ TARAF) */
+        #test-panel { 
+            position: fixed; right: 20px; top: 50%; transform: translateY(-50%);
+            background: rgba(0, 10, 20, 0.9); border: 2px solid #00d4ff;
+            padding: 20px; border-radius: 15px; pointer-events: auto; z-index: 9999;
+            width: 200px; text-align: center; box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+        #test-panel h3 { color: #00d4ff; margin-top: 0; font-size: 16px; text-transform: uppercase; }
+        .test-btn { 
+            width: 100%; padding: 10px; margin: 5px 0; border: none; border-radius: 5px;
+            cursor: pointer; font-weight: bold; font-family: 'Oswald'; transition: 0.3s;
+        }
+        .btn-follow { background: #1da1f2; color: white; }
+        .btn-like { background: #ff0055; color: white; }
+        .btn-gift { background: #ffaa00; color: black; }
+        .test-btn:hover { transform: scale(1.05); filter: brightness(1.2); }
+
+        /* REKLAM ALANI */
+        #ads { color: #555; font-size: 12px; margin-top: 15px; }
+        #ads a { color: #00d4ff; text-decoration: none; }
+
+        /* EJDERHA VE TEXT ANİMASYONLARI (Senin v10 Efektlerin) */
+        .event-node { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); text-align: center; }
+        .dragon-gif { width: 500px; }
+        .event-text { color: white; font-size: 50px; text-shadow: 0 0 20px #00d4ff, 0 0 40px #00d4ff; display: block; }
+        .combo-text { color: #ff0055; font-size: 70px; font-style: italic; }
     </style>
 </head>
 <body>
 
-<div class="panel">
-    <h1>V10 BLUE DRAGON</h1>
-    <p>TikTok Canlı Yayın Overlay Sistemi</p>
-    
-    <input type="text" id="username" placeholder="@TikTokKullaniciAdi">
-    <button onclick="generateLink()">LİNK OLUŞTUR</button>
+    <div id="overlay-container"></div>
 
-    <div id="result" class="result">
-        <p style="font-size: 12px; color: #00d4ff; margin: 0;">OBS TARAYICI LİNKİNİZ:</p>
-        <code id="linkText" style="color: #fff;"></code>
+    <div id="test-panel" id="panel-hide">
+        <h3>V10 TEST MENÜSÜ</h3>
+        <button class="test-btn btn-follow" onclick="simulate('follow')">TAKİP TEST</button>
+        <button class="test-btn btn-like" onclick="simulate('like')">100 PENÇE TEST</button>
+        <button class="test-btn btn-gift" onclick="simulate('gift', 'Tea')">TEA (ÇAY) TEST</button>
+        <button class="test-btn btn-gift" onclick="simulate('gift', 'Rose')">ROSE (GÜL) TEST</button>
+        
+        <div id="ads">
+            SATIN AL: <br>
+            <a href="https://t.me/katilbebek" target="_blank">@katilbebek Telegram</a>
+        </div>
+        <p style="font-size: 10px; color: #333;">OBS'de bu panel görünmez.</p>
     </div>
-
-    <div class="footer">
-        Şu an Ücretsiz Sürümdür.<br>
-        Özel Tasarım ve Full Sürüm İçin:
-        <a href="https://t.me/katilbebek" class="buy-now">Telegram: @katilbebek</a>
-    </div>
-</div>
 
 <script>
-    function generateLink() {
-        let user = document.getElementById('username').value.trim();
-        if(!user) return alert("Kullanıcı adı gir!");
-        if(!user.startsWith('@')) user = '@' + user;
+    const socket = io();
+    const container = document.getElementById('overlay-container');
+    
+    // URL'den kullanıcı adını al
+    const urlParams = new URLSearchParams(window.location.search);
+    const username = urlParams.get('k');
+    if (username) {
+        socket.emit('set-user', username);
+    }
+
+    // TEST FONKSİYONU
+    let comboCount = 0;
+    function simulate(type, giftName = '') {
+        let mockData = {
+            uniqueId: 'TestUser',
+            type: type,
+            text: type === 'follow' ? 'TAKİP ETTİ!' : (type === 'like' ? '100 PENÇE ATTI!' : giftName.toUpperCase() + ' GÖNDERDİ!'),
+            giftName: giftName
+        };
+
+        if (type === 'gift') {
+            comboCount++;
+            mockData.combo = comboCount;
+            // Gül ise kombo yap, Çay ise direkt göster gibi mantık kurabilirsin
+        } else {
+            comboCount = 0;
+        }
         
-        const baseLink = window.location.origin + "/app.html?k=" + user;
-        document.getElementById('linkText').innerText = baseLink;
-        document.getElementById('result').style.display = 'block';
+        showEvent(mockData);
+    }
+
+    // EVENT GÖSTERİMİ
+    socket.on('event', (data) => {
+        showEvent(data);
+    });
+
+    function showEvent(data) {
+        const div = document.createElement('div');
+        div.className = 'event-node';
+        
+        // Kombo varsa metni güncelle
+        let comboHtml = data.combo ? `<div class="combo-text">KOMBO x${data.combo}</div>` : '';
+
+        div.innerHTML = `
+            <img src="https://i.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJueGZ3bmZ3bmZ3bmZ3bmZ3bmZ3bmZ3bmZ3bmZ3bmZ3bmZ3JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1z/3o7TKMGpxx6xY2H5T2/giphy.gif" class="dragon-gif">
+            <div class="event-text">@${data.uniqueId}</div>
+            <div class="event-text">${data.text}</div>
+            ${comboHtml}
+        `;
+
+        container.appendChild(div);
+        setTimeout(() => div.remove(), 4000);
+    }
+
+    // OBS'de sağ paneli gizleme (Opsiyonel: Kullanıcı isterse kapatır)
+    if(window.location.search.includes('hide=true')) {
+        document.getElementById('test-panel').style.display = 'none';
     }
 </script>
-
 </body>
 </html>
