@@ -2,117 +2,130 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>V11 Ultra Dragon Overlay - @katilbebek</title>
+    <title>V12 Golden Dragon - @katilbebek</title>
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; overflow: hidden; background: transparent; font-family: 'Oswald', sans-serif; }
-        
-        /* ANA TAŞIYICI */
+
+        /* ANA TAŞIYICI - SOLDAN GİRİŞ */
         #event-wrapper {
             position: absolute;
-            left: -1200px; /* Başlangıçta ekran dışında */
-            top: 50px;
+            left: -1500px;
+            top: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            transition: all 0.7s cubic-bezier(0.68, -0.55, 0.27, 1.55);
             z-index: 999;
         }
 
-        #event-wrapper.active {
-            left: 50px; /* Ekrana giriş yapınca duracağı yer */
-        }
+        #event-wrapper.active { left: 40px; }
 
-        /* EJDERHA ARKA PLANI (PROFİLİ SARAN) */
-        .dragon-bg {
-            position: absolute;
-            width: 600px; /* Ejderha boyutu */
-            z-index: -1;
-            top: -150px; /* Profilin arkasına ortala */
-            filter: drop-shadow(0 0 20px #00d4ff);
-        }
-
-        /* PROFİL VE BİLGİ KARTI */
-        .dragon-card {
+        /* ALTIN SARISI ANİMASYONLU ÇERÇEVE */
+        .gold-frame {
+            position: relative;
             display: flex;
             align-items: center;
-            background: rgba(0, 0, 0, 0.9);
-            border: 4px solid #00d4ff;
-            border-radius: 80px 20px 80px 20px;
-            padding: 20px 50px;
-            box-shadow: 0 0 40px rgba(0, 212, 255, 0.6);
-            min-width: 450px;
+            background: #000;
+            padding: 20px 60px;
+            border-radius: 20px 100px 20px 100px;
+            border: 5px solid #ffd700;
+            box-shadow: 0 0 25px #ffd700, inset 0 0 15px #ffd700;
+            animation: goldGlow 2s infinite alternate;
+            min-width: 500px;
+        }
+
+        @keyframes goldGlow {
+            0% { box-shadow: 0 0 15px #ffd700; border-color: #ffd700; }
+            100% { box-shadow: 0 0 40px #ffaa00, inset 0 0 20px #ffaa00; border-color: #fff; }
+        }
+
+        /* MAVİ EJDERHA NEFESİ (PÜSKÜRTME) */
+        .dragon-breath {
+            position: absolute;
+            right: -100px;
+            top: -50px;
+            width: 250px;
+            z-index: 10;
+            pointer-events: none;
+            filter: hue-rotate(180deg); /* Ateşi maviye çevirir */
+        }
+
+        /* PROFİL RESMİ */
+        .pfp-box {
             position: relative;
+            width: 130px;
+            height: 130px;
+            flex-shrink: 0;
         }
 
         .pfp {
-            width: 120px;
-            height: 120px;
+            width: 100%;
+            height: 100%;
             border-radius: 50%;
-            border: 4px solid #00d4ff;
+            border: 4px solid #fff;
             object-fit: cover;
-            background: #000;
+            box-shadow: 0 0 15px #00d4ff;
         }
 
-        .info { margin-left: 25px; color: white; }
-        .user-id { font-size: 45px; margin: 0; text-transform: uppercase; letter-spacing: 1px; }
-        .action { font-size: 28px; color: #00d4ff; margin: 0; }
+        /* BİLGİ ALANI */
+        .info { margin-left: 30px; color: white; text-align: left; }
+        .user-id { font-size: 50px; margin: 0; color: #fff; text-shadow: 2px 2px 10px #000; }
+        .action { font-size: 30px; color: #00d4ff; margin: 0; text-transform: uppercase; font-style: italic; }
 
         /* KOMBO BALONU */
-        .combo-badge {
+        .combo {
             position: absolute;
-            right: -20px;
-            top: -20px;
-            background: #ff0055;
+            left: -30px;
+            top: -30px;
+            background: linear-gradient(45deg, #ff0055, #990022);
             color: white;
-            font-size: 50px;
-            padding: 10px 20px;
+            font-size: 60px;
+            padding: 15px;
             border-radius: 50%;
-            border: 4px solid white;
-            transform: rotate(15deg);
-            display: none;
+            border: 4px solid #fff;
             box-shadow: 0 0 20px #ff0055;
+            display: none;
+            z-index: 20;
         }
 
-        /* TELEGRAM REKLAMI (TAM ALTTA) */
-        .brand-footer {
-            margin-top: 15px;
+        /* KÜÇÜLTÜLMÜŞ TELEGRAM REKLAM */
+        .brand-mini {
+            margin-top: 10px;
             display: flex;
             align-items: center;
-            background: #229ED9; /* Telegram Mavisi */
-            color: white;
-            padding: 8px 25px;
-            border-radius: 50px;
-            font-size: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            border: 2px solid white;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid #00d4ff;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #00d4ff;
         }
 
-        .tg-icon {
-            width: 25px;
-            height: 25px;
-            margin-right: 10px;
-        }
+        .tg-icon { width: 16px; height: 16px; margin-right: 8px; }
     </style>
 </head>
 <body>
 
-    <audio id="firework-sound" src="villager.mp3"></audio>
+    <audio id="v-sound" src="villager.mp3"></audio>
 
     <div id="event-wrapper">
-        <img src="https://edebifikir.com/wp-content/uploads/kurtlar_vadisi_-1024x576.jpg" class="dragon-bg">
+        <img src="https://media.tenor.com/qaZGiIcGRJoAAAAi/smoke-transparent.gif" class="dragon-breath">
         
-        <div class="dragon-card">
-            <img id="u-pfp" src="https://via.placeholder.com/120" class="pfp">
+        <div id="u-combo" class="combo">x1</div>
+
+        <div class="gold-frame">
+            <div class="pfp-box">
+                <img id="u-pfp" src="https://via.placeholder.com/130" class="pfp">
+            </div>
             <div class="info">
                 <p id="u-name" class="user-id">KATILBEBEK</p>
                 <p id="u-action" class="action">TAKİP ETTİ!</p>
             </div>
-            <div id="u-combo" class="combo-badge">x1</div>
         </div>
 
-        <div class="brand-footer">
+        <div class="brand-mini">
             <img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" class="tg-icon">
             <span>Powered by <b>@katilbebek</b></span>
         </div>
@@ -122,26 +135,24 @@
     const socket = io();
     const urlParams = new URLSearchParams(window.location.search);
     const k = urlParams.get('k');
-    const sound = document.getElementById('firework-sound');
+    const vSound = document.getElementById('v-sound');
     
     if(k) socket.emit('set-user', k);
 
-    let displayTimeout;
+    let displayTime;
 
     socket.on('event', data => {
-        showDragon(data);
+        showOverlay(data);
     });
 
-    function showDragon(data) {
-        // Varsa eskiyi temizle
-        clearTimeout(displayTimeout);
-        const wrapper = document.getElementById('event-wrapper');
-        wrapper.classList.remove('active');
+    function showOverlay(data) {
+        clearTimeout(displayTime);
+        const wrap = document.getElementById('event-wrapper');
+        wrap.classList.remove('active');
 
-        // Verileri doldur
         setTimeout(() => {
-            document.getElementById('u-pfp').src = data.profilePictureUrl || 'https://via.placeholder.com/120';
-            document.getElementById('u-name').innerText = `@${data.uniqueId}`;
+            document.getElementById('u-pfp').src = data.profilePictureUrl || 'https://via.placeholder.com/130';
+            document.getElementById('u-name').innerText = `@${data.uniqueId}`.toUpperCase();
             document.getElementById('u-action').innerText = data.text;
             
             const comboEl = document.getElementById('u-combo');
@@ -152,25 +163,22 @@
                 comboEl.style.display = 'none';
             }
 
-            // SES ÇAL
-            sound.currentTime = 0;
-            sound.play().catch(e => console.log("Ses çalmak için sayfaya tıkla!"));
+            // SESİ ÇAL
+            vSound.currentTime = 0;
+            vSound.play().catch(e => console.log("Etkileşim gerekli"));
 
-            // Ekrana sür
-            wrapper.classList.add('active');
+            // AKTİF ET
+            wrap.classList.add('active');
 
-            // 6 saniye sonra gizle
-            displayTimeout = setTimeout(() => {
-                wrapper.classList.remove('active');
+            // 6 saniye sonra çek
+            displayTime = setTimeout(() => {
+                wrap.classList.remove('active');
             }, 6000);
-        }, 100);
+        }, 150);
     }
 
-    // OBS'te sesin çalışması için sayfaya tıklama gerekebilir, simüle edelim
-    window.addEventListener('click', () => {
-        console.log("Ses motoru aktif.");
-    });
+    // OBS etkileşimi için
+    window.addEventListener('mousedown', () => vSound.play().then(() => vSound.pause()));
 </script>
 </body>
 </html>
-
