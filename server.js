@@ -8,47 +8,31 @@ const app = express();
 const httpServer = createServer(app);
 const io = new Server(httpServer, { cors: { origin: "*" } });
 
-const PORT = 3000;
-
 app.use(express.static(__dirname));
+
+// Ana sayfa (Panel)
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Overlay ekranı
+app.get('/app.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'app.html'));
+});
 
 io.on('connection', (socket) => {
     let tiktok;
-
     socket.on('set-user', (username) => {
-        const cleanUser = username.replace('@', '');
+        const cleanUser = username.replace('@', '').split('?')[0];
         if (tiktok) tiktok.disconnect();
-
         tiktok = new WebcastPushConnection(cleanUser);
-        tiktok.connect()
-            .then(s => console.log(`v10 Ejderha Aktif: @${cleanUser}`))
-            .catch(e => console.error("Bağlantı Hatası:", e.message));
+        tiktok.connect().then(() => console.log(`Aktif: ${cleanUser}`)).catch(e => console.log("Hata"));
 
-        // TÜM HEDİYELER (En küçük gül dahil)
-        tiktok.on('gift', d => {
-            // Kombo devam ediyorsa veya bittiyse her türlü veriyi gönder
-            io.emit('event', { 
-                ...d, 
-                type: 'gift', 
-                text: `${d.giftName.toUpperCase()} FIRLATTI!`,
-                isCombo: d.repeatEnd === false
-            });
-        });
-
-        // TAKİP
-        tiktok.on('follow', d => io.emit('event', { ...d, type: 'follow', text: "AİLEYE KATILDI!" }));
-
-        // 100 BEĞENİ
-        let likeTracker = {};
-        tiktok.on('like', d => {
-            likeTracker[d.uniqueId] = (likeTracker[d.uniqueId] || 0) + d.likeCount;
-            if (likeTracker[d.uniqueId] >= 100) {
-                io.emit('event', { ...d, type: 'like', text: "100 PENÇE ATTI!" });
-                likeTracker[d.uniqueId] = 0;
-            }
-        });
+        tiktok.on('gift', d => io.emit('event', { ...d, type: 'gift', text: `${d.giftName.toUpperCase()} ATTI!`, isCombo: d.repeatEnd === false }));
+        tiktok.on('follow', d => io.emit('event', { ...d, type: 'follow', text: "TAKİP ETTİ!" }));
+        tiktok.on('like', d => { if(d.likeCount >= 100) io.emit('event', { ...d, type: 'like', text: "100 PENÇE!" }); });
     });
 });
 
-
-httpServer.listen(PORT, () => console.log(`v10 Server: http://localhost:${PORT}/Ozellikler/index.html?k=@kullaniciadi`));
+const PORT = process.env.PORT || 3000;
+httpServer.listen(PORT, () => console.log(`Sistem Yayında!`));
