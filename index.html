@@ -80,7 +80,7 @@
 </div>
 
 <script>
-    const socket = io("http://localhost:3000");
+    const socket = io("https://manmanman.onrender.com/");
     const k = new URLSearchParams(window.location.search).get('k');
     if(k) socket.emit('set-user', k);
 
@@ -147,4 +147,5 @@
     }
 </script>
 </body>
+
 </html>
