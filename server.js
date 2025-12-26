@@ -10,7 +10,7 @@ const io = new Server(httpServer, { cors: { origin: "*" } });
 
 const PORT = 3000;
 
-app.use('/Ozellikler', express.static(path.join(__dirname, 'Ozellikler')));
+app.use(express.static(__dirname));
 
 io.on('connection', (socket) => {
     let tiktok;
@@ -49,5 +49,6 @@ io.on('connection', (socket) => {
         });
     });
 });
+
 
 httpServer.listen(PORT, () => console.log(`v10 Server: http://localhost:${PORT}/Ozellikler/index.html?k=@kullaniciadi`));
